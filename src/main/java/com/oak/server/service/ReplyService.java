@@ -2,7 +2,7 @@ package com.oak.server.service;
 
 import com.oak.server.domain.Post;
 import com.oak.server.domain.Reply;
-import com.oak.server.repository.PostRepository;
+import com.oak.server.domain.SiteUser;
 import com.oak.server.repository.ReplyRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -10,53 +10,51 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-@Service
 @RequiredArgsConstructor
+@Service
 public class ReplyService {
 
     private final ReplyRepository replyRepository;
-    private final PostRepository postRepository;
+    private final PostService postService; // 게시글 존재 확인
 
-    // ① 댓글 쓰기
+    // 1. 댓글 쓰기
     @Transactional
-    public void write(Long postId, String content, String author) {
-        // 1. 게시글 유무 확인
-        Post post = postRepository.findById(postId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 게시글입니다."));
+    public void write(Long postId, String content, SiteUser author) {
+        Post post = postService.findById(postId);
 
-        // 2. 댓글 생성
-        Reply reply = new Reply(content, author, post);
+        Reply reply = new Reply();
+        reply.setContent(content);
+        reply.setCreateDate(java.time.LocalDateTime.now());
+        reply.setPost(post);
+        reply.setAuthor(author);
 
-        // 3. 저장
-        replyRepository.save(reply);
+        this.replyRepository.save(reply);
     }
 
-    // ② 댓글 목록 조회 (특정 게시글 댓글)
+    // 2. 댓글 조회
     @Transactional(readOnly = true)
-    public List<Reply> findAll(Long postId) {
-        return replyRepository.findAllByPostId(postId);
+    public Reply findById(Long id) {
+        return replyRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("댓글이 존재하지 않습니다."));
     }
 
-    // ③ 댓글 수정
+    // 3. 댓글 수정
     @Transactional
-    public void edit(Long replyId, String content) {
-        Reply reply = replyRepository.findById(replyId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
-
-        // Dirty Checking으로 자동 저장
+    public void edit(Long id, String content) {
+        Reply reply = findById(id);
         reply.update(content);
     }
 
-    // ④ 댓글 삭제
+    // 4. 댓글 삭제
     @Transactional
-    public void delete(Long replyId) {
-        replyRepository.deleteById(replyId);
+    public void delete(Long id) {
+        replyRepository.deleteById(id);
     }
 
-    // ⑤ 댓글 단건 조회 (수정 화면용)
+    // 5. 특정 게시글의 댓글 목록
     @Transactional(readOnly = true)
-    public Reply findById(Long replyId) {
-        return replyRepository.findById(replyId)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+    public List<Reply> findAll(Long postId) {
+        Post post = postService.findById(postId);
+        return post.getReplyList();
     }
 }

@@ -17,6 +17,9 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.HttpStatus;
 import org.springframework.web.server.ResponseStatusException;
+import jakarta.validation.Valid;
+import org.springframework.validation.BindingResult;
+import com.oak.server.controller.PostForm;
 
 import java.security.Principal;
 import java.util.List;
@@ -52,20 +55,20 @@ public class BoardController {
     // 1. 글쓰기 화면 (GET)
     @PreAuthorize("isAuthenticated()")
     @GetMapping("/post/write")
-    public String writeForm() {
+    public String writeForm(PostForm postForm) {
         return "post/write";
     }
 
     // 2. 작성된 글 저장 (POST)
-    @PreAuthorize("isAuthenticated()") // 로그인한 사람만 작성 가능
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/write")
-    public String write(String title, String content, Principal principal) {
+    public String write(@Valid PostForm postForm, BindingResult bindingResult, Principal principal) {
+        if (bindingResult.hasErrors()) {
+            return "post/write";
+        }
 
-        String username = principal.getName();
-
-        SiteUser siteUser = userService.getUser(username);
-
-        postService.write(title, content, siteUser);
+        SiteUser siteUser = this.userService.getUser(principal.getName());
+        this.postService.write(postForm.getTitle(), postForm.getContent(), siteUser);
 
         return "redirect:/";
     }
@@ -113,10 +116,15 @@ public class BoardController {
     }
 
     // 6. 댓글 저장 (POST)
-    // TODO: 작성자 연결 (Principal)
     @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/{id}/reply")
     public String writeReply(@PathVariable Long id, String content, Principal principal) {
+        // 1. 로그인한 회원 정보 가져오기
+        SiteUser siteUser = this.userService.getUser(principal.getName());
+
+        // 2. 댓글 저장 (게시글ID, 내용, 작성자객체)
+        replyService.write(id, content, siteUser);
+
         return "redirect:/post/" + id;
     }
 
@@ -129,17 +137,33 @@ public class BoardController {
     }
 
     // 8. 댓글 수정 요청 (POST)
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/reply/edit/{replyId}")
-    public String editReply(@PathVariable Long replyId, String content) {
-        replyService.edit(replyId, content);
+    public String editReply(@PathVariable Long replyId, String content, Principal principal) {
         Reply reply = replyService.findById(replyId);
-        Long postId = reply.getPost().getId();
-        return "redirect:/post/" + postId;
+
+        // ★ 보안 검사: 내 댓글이 아니면 에러 발생
+        if (!reply.getAuthor().getUsername().equals(principal.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
+        }
+
+        replyService.edit(replyId, content);
+
+        // 댓글이 달린 게시글 페이지로 돌아감
+        return "redirect:/post/" + reply.getPost().getId();
     }
 
     // 9. 댓글 삭제 (POST)
+    @PreAuthorize("isAuthenticated()")
     @PostMapping("/post/{postId}/reply/delete/{replyId}")
-    public String deleteReply(@PathVariable Long postId, @PathVariable Long replyId) {
+    public String deleteReply(@PathVariable Long postId, @PathVariable Long replyId, Principal principal) {
+        Reply reply = replyService.findById(replyId);
+
+        // ★ 보안 검사: 내 댓글이 아니면 에러 발생
+        if (!reply.getAuthor().getUsername().equals(principal.getName())) {
+            throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제 권한이 없습니다.");
+        }
+
         replyService.delete(replyId);
         return "redirect:/post/" + postId;
     }

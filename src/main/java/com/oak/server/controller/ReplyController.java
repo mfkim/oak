@@ -1,7 +1,9 @@
 package com.oak.server.controller;
 
 import com.oak.server.domain.Reply;
+import com.oak.server.domain.SiteUser;
 import com.oak.server.service.ReplyService;
+import com.oak.server.service.UserService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -16,29 +18,34 @@ import java.util.List;
 public class ReplyController {
 
     private final ReplyService replyService;
+    private final UserService userService;
 
-    // ① 댓글 작성 (POST /api/posts/{postId}/replies)
+    // 1. 댓글 작성 (POST /api/posts/{postId}/replies)
     @PostMapping("/{postId}/replies")
     public String write(@PathVariable Long postId, @RequestBody @Valid ReplyForm form) {
-        replyService.write(postId, form.getContent(), form.getAuthor());
+        // ① 입력받은 아이디(String)로 회원 객체(SiteUser) 조회
+        SiteUser author = userService.getUser(form.getAuthor());
+
+        // ② 서비스에 회원 객체 전달
+        replyService.write(postId, form.getContent(), author);
+
         return "✅ 댓글 등록 성공!";
     }
 
-    // ② 댓글 조회 (GET /api/posts/{postId}/replies)
-    // 해당 게시글에 달린 댓글만 조회
+    // 2. 댓글 조회 (GET /api/posts/{postId}/replies)
     @GetMapping("/{postId}/replies")
     public List<Reply> findAll(@PathVariable Long postId) {
         return replyService.findAll(postId);
     }
 
-    // ③ 댓글 수정 (PUT /api/posts/{postId}/replies/{replyId})
+    // 3. 댓글 수정 (PUT /api/posts/{postId}/replies/{replyId})
     @PutMapping("/{postId}/replies/{replyId}")
     public String edit(@PathVariable Long replyId, @RequestBody @Valid ReplyForm form) {
         replyService.edit(replyId, form.getContent());
         return "✅ 댓글 수정 성공!";
     }
 
-    // ④ 댓글 삭제 (DELETE /api/posts/{postId}/replies/{replyId})
+    // 4. 댓글 삭제 (DELETE /api/posts/{postId}/replies/{replyId})
     @DeleteMapping("/{postId}/replies/{replyId}")
     public String delete(@PathVariable Long replyId) {
         replyService.delete(replyId);
@@ -51,6 +58,6 @@ public class ReplyController {
         @NotBlank(message = "댓글 내용은 필수입니다.")
         private String content;
 
-        private String author;
+        private String author; // API Test
     }
 }

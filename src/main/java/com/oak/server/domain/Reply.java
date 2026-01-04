@@ -2,34 +2,29 @@ package com.oak.server.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity
+import java.time.LocalDateTime;
+
 @Getter
-@NoArgsConstructor
+@Setter
+@Entity
 public class Reply {
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
-    private String content; // 댓글 내용
+    @Column(columnDefinition = "TEXT")
+    private String content;
 
-    private String author; // 작성자
+    private LocalDateTime createDate;
 
-    // ★ 연관관계 매핑 (N:1)
-    // 여러 개의 댓글(Many) -> 하나의 게시글(One)
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    @ManyToOne
     private Post post;
 
-    // 생성자
-    public Reply(String content, String author, Post post) {
-        this.content = content;
-        this.author = author;
-        this.post = post;
-    }
+    @ManyToOne
+    private SiteUser author;
 
     // 댓글 수정
     public void update(String content) {

@@ -28,7 +28,7 @@ public class PostService {
         post.setTitle(title);
         post.setContent(content);
         post.setCreateDate(LocalDateTime.now());
-        post.setAuthor(author); // 작성자(객체) 저장
+        post.setAuthor(author);
         this.postRepository.save(post);
     }
 

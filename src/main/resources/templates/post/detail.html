@@ -1,9 +1,8 @@
 <!DOCTYPE html>
 <html layout:decorate="~{layout/base}"
       xmlns:th="http://www.thymeleaf.org"
-      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
-
-<div layout:fragment="content">
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"> <div layout:fragment="content">
 
     <div class="card shadow-sm mb-5">
 
@@ -13,8 +12,7 @@
                 <span class="badge bg-secondary">No.<span th:text="${post.id}">1</span></span>
             </div>
             <div class="text-muted mt-2" style="font-size: 0.9rem;">
-                <span>🖊️ 작성자: <strong th:if="${post.author != null}"
-                                      th:text="${post.author.username}">작성자</strong></span>
+                <span>🖊️ 작성자: <strong th:if="${post.author != null}" th:text="${post.author.username}">작성자</strong></span>
             </div>
         </div>
 
@@ -27,9 +25,7 @@
 
             <th:block sec:authorize="isAuthenticated()"
                       th:if="${post.author != null and #authentication.name == post.author.username}">
-
                 <a th:href="@{/post/edit/{id}(id=${post.id})}" class="btn btn-warning me-2">수정</a>
-
                 <form th:action="@{/post/delete/{id}(id=${post.id})}" method="post" class="d-inline">
                     <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
                 </form>
@@ -45,16 +41,18 @@
 
         <div class="card-body">
             <form th:action="@{/post/{id}/reply(id=${post.id})}" method="post" class="mb-4">
-                <div class="row g-2">
-                    <div class="col-md-3">
-                        <input type="text" name="author" class="form-control" placeholder="작성자" required>
-                    </div>
-                    <div class="col-md-7">
-                        <input type="text" name="content" class="form-control" placeholder="댓글 내용을 입력하세요..." required>
+
+                <div class="row g-2" sec:authorize="isAuthenticated()">
+                    <div class="col-md-10">
+                        <textarea name="content" class="form-control" rows="3" placeholder="댓글 내용을 입력하세요..." required></textarea>
                     </div>
                     <div class="col-md-2 d-grid">
-                        <button type="submit" class="btn btn-primary">등록</button>
+                        <button type="submit" class="btn btn-primary" style="height: 100%;">등록</button>
                     </div>
+                </div>
+
+                <div class="alert alert-light border text-center" sec:authorize="isAnonymous()">
+                    <a href="/user/login" class="fw-bold text-decoration-none">로그인</a> 후 댓글을 작성할 수 있습니다.
                 </div>
             </form>
 
@@ -69,12 +67,14 @@
                     <div class="d-flex justify-content-between align-items-start">
                         <div>
                             <div class="fw-bold mb-1">
-                                <span th:text="${reply.author}">작성자</span>
+                                <span th:if="${reply.author != null}" th:text="${reply.author.username}">작성자</span>
                             </div>
                             <div th:text="${reply.content}" class="text-break">내용</div>
                         </div>
 
-                        <div class="d-flex gap-2">
+                        <div class="d-flex gap-2" sec:authorize="isAuthenticated()"
+                             th:if="${reply.author != null and #authentication.name == reply.author.username}">
+
                             <a th:href="@{/reply/edit/{id}(id=${reply.id})}" class="btn btn-sm btn-outline-secondary"
                                style="font-size: 0.75rem;">수정</a>
 
