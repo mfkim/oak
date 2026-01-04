@@ -36,7 +36,7 @@
                             제목
                         </a>
                     </td>
-                    <td th:text="${post.author}" class="text-center text-muted">작성자</td>
+                    <td th:text="${post.author?.username}" class="text-center text-muted">작성자</td>
                 </tr>
                 </tbody>
             </table>

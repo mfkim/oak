@@ -1,7 +1,9 @@
 package com.oak.server.controller;
 
 import com.oak.server.domain.Post;
+import com.oak.server.domain.SiteUser;
 import com.oak.server.service.PostService;
+import com.oak.server.service.UserService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
@@ -17,11 +19,15 @@ import java.util.List;
 public class PostController {
 
     private final PostService postService;
+    private final UserService userService;
 
     // ① 글 쓰기 (POST /api/posts)
     @PostMapping
     public String write(@RequestBody @Valid PostForm form) {
-        postService.write(form.getTitle(), form.getContent(), form.getAuthor());
+        SiteUser author = userService.getUser(form.getAuthor());
+
+        postService.write(form.getTitle(), form.getContent(), author);
+
         return "✅ 게시글 저장 성공!";
     }
 
@@ -40,7 +46,8 @@ public class PostController {
     // ④ 수정 (PUT /api/posts/1)
     @PutMapping("/{id}")
     public String edit(@PathVariable Long id, @RequestBody @Valid PostForm form) {
-        postService.edit(id, form.getTitle(), form.getContent(), form.getAuthor());
+        postService.edit(id, form.getTitle(), form.getContent());
+
         return "✅ 게시글 수정 성공!";
     }
 
@@ -55,13 +62,14 @@ public class PostController {
     @Data
     static class PostForm {
 
-        @NotBlank(message = "제목은 필수입니다.") // 빈칸, 공백 금지
+        @NotBlank(message = "제목은 필수입니다.")
         @Size(max = 20, message = "제목은 20자 이내로 입력해주세요.")
         private String title;
 
         @NotBlank(message = "내용은 필수입니다.")
         private String content;
 
-        private String author; // (로그인 기능 생기면 자동화)
+        // REST API 테스트용으로 일단 String
+        private String author;
     }
 }

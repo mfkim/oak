@@ -2,36 +2,31 @@ package com.oak.server.domain;
 
 import jakarta.persistence.*;
 import lombok.Getter;
-import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Entity
+import java.time.LocalDateTime;
+import java.util.List;
+
 @Getter
-@NoArgsConstructor
+@Setter
+@Entity
 public class Post {
 
-    @Id // 고유 키(PK)
-    @GeneratedValue(strategy = GenerationType.IDENTITY) // 번호 자동 증가 (1, 2, 3...)
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(nullable = false)
+    @Column(length = 200)
     private String title;
 
-    @Column(columnDefinition = "TEXT", nullable = false)
+    @Column(columnDefinition = "TEXT")
     private String content;
 
-    private String author;
+    private LocalDateTime createDate;
 
-    // 생성자 추가
-    public Post(String title, String content, String author) {
-        this.title = title;
-        this.content = content;
-        this.author = author;
-    }
+    @ManyToOne
+    private SiteUser author;
 
-    // 수정 기능
-    public void update(String title, String content, String author) {
-        this.title = title;
-        this.content = content;
-        this.author = author;
-    }
+    @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
+    private List<Reply> replyList;
 }
