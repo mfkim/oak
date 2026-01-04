@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${post.title}">게시글 상세</title>
+</head>
+<body>
+
+<h1 th:text="${post.title}">제목</h1>
+
+<p>
+    <strong>작성자:</strong> <span th:text="${post.author}">작성자</span> |
+    <strong>번호:</strong> <span th:text="${post.id}">id</span>
+</p>
+
+<hr>
+
+<div th:text="${post.content}" style="min-height: 200px; padding: 10px; border: 1px solid #ddd;">
+    내용
+</div>
+
+<hr>
+
+<div style="margin-top: 10px;">
+    <a href="/">목록으로</a>
+
+    <a th:href="@{/post/edit/{id}(id=${post.id})}" style="margin-left: 10px;">수정하기</a>
+
+    <form th:action="@{/post/delete/{id}(id=${post.id})}" method="post" style="display:inline; margin-left: 10px;">
+        <button type="submit" onclick="return confirm('정말 삭제하시겠습니까?')">삭제하기</button>
+    </form>
+</div>
+
+<hr style="margin-top: 30px;">
+
+<div style="background-color: #f9f9f9; padding: 15px; border-radius: 5px;">
+    <h3>💬 댓글 달기</h3>
+    <form th:action="@{/post/{id}/reply(id=${post.id})}" method="post">
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+            <input type="text" name="author" placeholder="작성자" required style="width: 20%;">
+            <input type="text" name="content" placeholder="댓글 내용을 입력하세요" required style="flex-grow: 1;">
+        </div>
+        <button type="submit" style="width: 100%;">등록</button>
+    </form>
+</div>
+
+<div style="margin-top: 20px;">
+    <h4>댓글 목록 (<span th:text="${replies.size()}">0</span>)</h4>
+
+    <ul>
+        <li th:if="${#lists.isEmpty(replies)}">아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!</li>
+
+        <li th:each="reply : ${replies}" style="border-bottom: 1px solid #eee; padding: 10px 0;">
+            <div style="display: flex; justify-content: space-between;">
+
+                <div>
+                    <strong th:text="${reply.author}">작성자</strong>
+                    <p th:text="${reply.content}" style="margin: 5px 0;">내용</p>
+                </div>
+
+                <div style="font-size: 0.8em;">
+                    <a th:href="@{/reply/edit/{id}(id=${reply.id})}">[수정]</a>
+
+                    <form th:action="@{/post/{postId}/reply/delete/{replyId}(postId=${post.id}, replyId=${reply.id})}"
+                          method="post" style="display:inline; margin-left: 5px;">
+                        <button type="submit" onclick="return confirm('댓글을 삭제할까요?')"
+                                style="border:none; background:none; color:red; cursor:pointer; text-decoration:underline;">
+                            [삭제]
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </li>
+    </ul>
+</div>
+
+</body>
+</html>

@@ -52,4 +52,11 @@ public class ReplyService {
     public void delete(Long replyId) {
         replyRepository.deleteById(replyId);
     }
+
+    // ⑤ 댓글 단건 조회 (수정 화면용)
+    @Transactional(readOnly = true)
+    public Reply findById(Long replyId) {
+        return replyRepository.findById(replyId)
+                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 댓글입니다."));
+    }
 }

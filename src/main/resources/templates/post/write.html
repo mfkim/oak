@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>글쓰기</title>
+    <style>
+        div { margin-bottom: 15px; }
+        label { display: block; font-weight: bold; }
+        input[type="text"], textarea { width: 100%; padding: 8px; }
+        textarea { height: 200px; }
+    </style>
+</head>
+<body>
+
+<h1>✏️ 새 글 작성</h1>
+
+<form action="/post/write" method="post">
+
+    <div>
+        <label for="title">제목</label>
+        <input type="text" id="title" name="title" placeholder="제목을 입력하세요" required>
+    </div>
+
+    <div>
+        <label for="author">작성자</label>
+        <input type="text" id="author" name="author" placeholder="이름" required>
+    </div>
+
+    <div>
+        <label for="content">내용</label>
+        <textarea id="content" name="content" placeholder="내용을 자유롭게 적어주세요" required></textarea>
+    </div>
+
+    <button type="submit">저장하기</button>
+    <a href="/">취소</a>
+
+</form>
+
+</body>
+</html>
