@@ -1,40 +1,42 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
-<head>
-  <meta charset="UTF-8">
-  <title>글 수정</title>
-  <style>
-    div { margin-bottom: 15px; }
-    label { display: block; font-weight: bold; }
-    input[type="text"], textarea { width: 100%; padding: 8px; }
-    textarea { height: 200px; }
-  </style>
-</head>
-<body>
+<html layout:decorate="~{layout/base}"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<h1>🔨 글 수정하기</h1>
+<div layout:fragment="content">
 
-<form th:action="@{/post/edit/{id}(id=${post.id})}" method="post">
+  <div class="row justify-content-center">
+    <div class="col-md-8">
+      <h2 class="mb-4 fw-bold">🔨 글 수정하기</h2>
 
-  <div>
-    <label for="title">제목</label>
-    <input type="text" id="title" name="title" th:value="${post.title}" required>
+      <div class="card shadow-sm border-warning"> <div class="card-body p-4">
+        <form th:action="@{/post/edit/{id}(id=${post.id})}" method="post">
+
+          <div class="mb-3">
+            <label for="title" class="form-label fw-bold">제목</label>
+            <input type="text" id="title" name="title" th:value="${post.title}" class="form-control" required>
+          </div>
+
+          <div class="mb-3">
+            <label for="author" class="form-label fw-bold">작성자</label>
+            <input type="text" id="author" name="author" th:value="${post.author}" class="form-control" style="max-width: 200px;" required>
+          </div>
+
+          <div class="mb-4">
+            <label for="content" class="form-label fw-bold">내용</label>
+            <textarea id="content" name="content" th:text="${post.content}" class="form-control" rows="10" required></textarea>
+          </div>
+
+          <div class="d-flex justify-content-end">
+            <a th:href="@{/post/{id}(id=${post.id})}" class="btn btn-secondary me-2">취소</a>
+            <button type="submit" class="btn btn-warning">수정 완료</button>
+          </div>
+
+        </form>
+      </div>
+      </div>
+    </div>
   </div>
 
-  <div>
-    <label for="author">작성자</label>
-    <input type="text" id="author" name="author" th:value="${post.author}" required>
-  </div>
-
-  <div>
-    <label for="content">내용</label>
-    <textarea id="content" name="content" th:text="${post.content}" required></textarea>
-  </div>
-
-  <button type="submit">수정 완료</button>
-  <a th:href="@{/post/{id}(id=${post.id})}">취소</a>
-
-</form>
-
-</body>
+</div>
 </html>

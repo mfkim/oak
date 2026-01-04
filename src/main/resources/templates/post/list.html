@@ -1,42 +1,46 @@
 <!DOCTYPE html>
-<html xmlns:th="http://www.thymeleaf.org">
+<html layout:decorate="~{layout/base}"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
-<head>
-    <meta charset="UTF-8">
-    <title>참나무 게시판</title>
-    <style>
-        table { width: 100%; border-collapse: collapse; }
-        th, td { border: 1px solid #ddd; padding: 8px; text-align: left; }
-        th { background-color: #f2f2f2; }
-    </style>
-</head>
+<div layout:fragment="content">
 
-<body>
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h2 class="fw-bold">참나무 게시판</h2>
+        <a href="/post/write" class="btn btn-primary">✏️ 새 글 쓰기</a>
+    </div>
 
-<h1>참나무 게시판</h1>
+    <div class="card shadow-sm">
+        <div class="card-body p-0">
+            <table class="table table-hover mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th style="width: 10%;" class="text-center">번호</th>
+                    <th style="width: 60%;">제목</th>
+                    <th style="width: 30%;" class="text-center">작성자</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(posts)}">
+                    <td colspan="3" class="text-center py-5 text-muted">
+                        아직 작성된 게시글이 없습니다.
+                    </td>
+                </tr>
 
-<a href="/post/write" style="margin-bottom: 10px; display: inline-block;">글쓰기</a>
+                <tr th:each="post : ${posts}">
+                    <td th:text="${post.id}" class="text-center">1</td>
+                    <td>
+                        <a th:href="@{/post/{id}(id=${post.id})}" th:text="${post.title}"
+                           class="text-decoration-none text-dark fw-bold">
+                            제목 예시
+                        </a>
+                    </td>
+                    <td th:text="${post.author}" class="text-center text-muted">홍길동</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
 
-<table>
-    <thead>
-    <tr>
-        <th>번호</th>
-        <th>제목</th>
-        <th>작성자</th>
-    </tr>
-    </thead>
-    <tbody>
-    <tr th:each="post : ${posts}">
-        <td th:text="${post.id}">1</td>
-        <td>
-            <a th:href="@{/post/{id}(id=${post.id})}" th:text="${post.title}">
-                제목
-            </a>
-        </td>
-        <td th:text="${post.author}">작성자</td>
-    </tr>
-    </tbody>
-</table>
-
-</body>
+</div>
 </html>
