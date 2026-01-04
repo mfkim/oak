@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html layout:decorate="~{layout/base}"
+      xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
+
+<div layout:fragment="content">
+  <div class="row justify-content-center">
+    <div class="col-md-4"> <div class="card shadow-sm mt-5">
+      <div class="card-header bg-secondary text-white text-center py-3">
+        <h4 class="mb-0 fw-bold">🔐 로그인</h4>
+      </div>
+
+      <div class="card-body p-4">
+        <div th:if="${param.error}">
+          <div class="alert alert-danger">
+            아이디 또는 비밀번호를 확인해 주세요.
+          </div>
+        </div>
+
+        <form th:action="@{/user/login}" method="post">
+
+          <div class="mb-3">
+            <label for="username" class="form-label fw-bold">아이디</label>
+            <input type="text" name="username" id="username" class="form-control" placeholder="아이디 입력" required>
+          </div>
+
+          <div class="mb-4">
+            <label for="password" class="form-label fw-bold">비밀번호</label>
+            <input type="password" name="password" id="password" class="form-control" placeholder="비밀번호 입력" required>
+          </div>
+
+          <div class="d-grid gap-2">
+            <button type="submit" class="btn btn-primary btn-lg">로그인</button>
+          </div>
+
+        </form>
+      </div>
+    </div>
+
+      <div class="text-center mt-3">
+        <span class="text-muted">아직 계정이 없으신가요?</span>
+        <a href="/user/signup" class="text-decoration-none fw-bold ms-1">회원가입</a>
+      </div>
+    </div>
+  </div>
+</div>
+</html>
