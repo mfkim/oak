@@ -5,6 +5,8 @@ import com.oak.server.service.ReplyService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -17,7 +19,7 @@ public class ReplyController {
 
     // ① 댓글 작성 (POST /api/posts/{postId}/replies)
     @PostMapping("/{postId}/replies")
-    public String write(@PathVariable Long postId, @RequestBody ReplyForm form) {
+    public String write(@PathVariable Long postId, @RequestBody @Valid ReplyForm form) {
         replyService.write(postId, form.getContent(), form.getAuthor());
         return "✅ 댓글 등록 성공!";
     }
@@ -30,9 +32,8 @@ public class ReplyController {
     }
 
     // ③ 댓글 수정 (PUT /api/posts/{postId}/replies/{replyId})
-    // 주소 규칙을 맞추기 위해 postId도 받지만, 실제로는 replyId로 찾습니다.
     @PutMapping("/{postId}/replies/{replyId}")
-    public String edit(@PathVariable Long replyId, @RequestBody ReplyForm form) {
+    public String edit(@PathVariable Long replyId, @RequestBody @Valid ReplyForm form) {
         replyService.edit(replyId, form.getContent());
         return "✅ 댓글 수정 성공!";
     }
@@ -47,7 +48,9 @@ public class ReplyController {
     // DTO
     @Data
     static class ReplyForm {
+        @NotBlank(message = "댓글 내용은 필수입니다.")
         private String content;
+
         private String author;
     }
 }

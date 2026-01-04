@@ -5,6 +5,9 @@ import com.oak.server.service.PostService;
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
 import org.springframework.web.bind.annotation.*;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.Size;
+import jakarta.validation.Valid;
 
 import java.util.List;
 
@@ -17,8 +20,7 @@ public class PostController {
 
     // ① 글 쓰기 (POST /api/posts)
     @PostMapping
-    public String write(@RequestBody PostForm form) {
-        // @RequestBody: "JSON으로 보낸 데이터를 이 폼으로 담아주세요"
+    public String write(@RequestBody @Valid PostForm form) {
         postService.write(form.getTitle(), form.getContent(), form.getAuthor());
         return "✅ 게시글 저장 성공!";
     }
@@ -37,7 +39,7 @@ public class PostController {
 
     // ④ 수정 (PUT /api/posts/1)
     @PutMapping("/{id}")
-    public String edit(@PathVariable Long id, @RequestBody PostForm form) {
+    public String edit(@PathVariable Long id, @RequestBody @Valid PostForm form) {
         postService.edit(id, form.getTitle(), form.getContent(), form.getAuthor());
         return "✅ 게시글 수정 성공!";
     }
@@ -49,11 +51,17 @@ public class PostController {
         return "🗑️ 게시글 삭제 성공!";
     }
 
-    // [내부 클래스] 데이터를 받을 때 쓸 임시 폼 (DTO 역할)
+    // DTO
     @Data
     static class PostForm {
+
+        @NotBlank(message = "제목은 필수입니다.") // 빈칸, 공백 금지
+        @Size(max = 20, message = "제목은 20자 이내로 입력해주세요.")
         private String title;
+
+        @NotBlank(message = "내용은 필수입니다.")
         private String content;
-        private String author;
+
+        private String author; // (로그인 기능 생기면 자동화)
     }
 }
