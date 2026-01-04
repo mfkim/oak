@@ -2,34 +2,58 @@
 <html layout:decorate="~{layout/base}"
       xmlns:th="http://www.thymeleaf.org"
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
-      xmlns:sec="http://www.thymeleaf.org/extras/spring-security"> <div layout:fragment="content">
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<div layout:fragment="content">
 
-    <div class="card shadow-sm mb-5">
+    <div class="card shadow-sm border-0 mb-5">
+        <div class="card-body p-5">
+            <div class="border-bottom pb-3 mb-4">
+                <div class="d-flex justify-content-between align-items-end mb-2">
+                    <h2 class="fw-bold mb-0" th:text="${post.title}">게시글 제목</h2>
+                    <span class="text-muted fst-italic">#<span th:text="${post.id}">1</span></span>
+                </div>
 
-        <div class="card-header bg-light py-3">
-            <div class="d-flex justify-content-between align-items-center">
-                <h3 class="card-title fw-bold mb-0" th:text="${post.title}">제목</h3>
-                <span class="badge bg-secondary">No.<span th:text="${post.id}">1</span></span>
+                <div class="d-flex justify-content-between text-muted small">
+                    <div>
+                        <span class="me-3">
+                            🖊️ <strong class="text-dark" th:if="${post.author != null}"
+                                       th:text="${post.author.username}">작성자</strong>
+                        </span>
+                        <span th:text="${#temporals.format(post.createDate, 'yyyy-MM-dd HH:mm')}">2026-01-05 12:00</span>
+                    </div>
+                </div>
             </div>
-            <div class="text-muted mt-2" style="font-size: 0.9rem;">
-                <span>🖊️ 작성자: <strong th:if="${post.author != null}" th:text="${post.author.username}">작성자</strong></span>
+
+            <div class="mb-5">
+                <p class="card-text text-break" th:text="${post.content}"
+                   style="white-space: pre-wrap; line-height: 1.8; font-size: 1.05rem;">내용</p>
             </div>
-        </div>
 
-        <div class="card-body" style="min-height: 200px;">
-            <p class="card-text" th:text="${post.content}" style="white-space: pre-wrap;">내용</p>
-        </div>
+            <div class="text-center mb-4">
+                <a th:href="@{/post/vote/{id}(id=${post.id})}"
+                   class="btn btn-outline-danger btn-lg px-4 rounded-pill"> <span class="me-1">❤️</span>
+                    <span class="fw-bold">좋아요</span>
+                    <span class="badge bg-danger ms-2 rounded-pill" th:text="${#lists.size(post.voter)}">0</span>
+                </a>
+            </div>
 
-        <div class="card-footer bg-white text-end py-3">
-            <a href="/" class="btn btn-secondary me-2">목록으로</a>
+            <div class="d-flex justify-content-between align-items-center border-top pt-4">
+                <a href="/" class="btn btn-outline-secondary">
+                    ⬅️ 목록으로
+                </a>
 
-            <th:block sec:authorize="isAuthenticated()"
-                      th:if="${post.author != null and #authentication.name == post.author.username}">
-                <a th:href="@{/post/edit/{id}(id=${post.id})}" class="btn btn-warning me-2">수정</a>
-                <form th:action="@{/post/delete/{id}(id=${post.id})}" method="post" class="d-inline">
-                    <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제</button>
-                </form>
-            </th:block>
+                <div sec:authorize="isAuthenticated()"
+                     th:if="${post.author != null and #authentication.name == post.author.username}">
+
+                    <a th:href="@{/post/edit/{id}(id=${post.id})}" class="btn btn-warning me-2">수정</a>
+
+                    <form th:action="@{/post/delete/{id}(id=${post.id})}" method="post" class="d-inline">
+                        <button type="submit" class="btn btn-danger" onclick="return confirm('정말 삭제하시겠습니까?')">삭제
+                        </button>
+                    </form>
+                </div>
+            </div>
+
         </div>
     </div>
 
@@ -44,7 +68,8 @@
 
                 <div class="row g-2" sec:authorize="isAuthenticated()">
                     <div class="col-md-10">
-                        <textarea name="content" class="form-control" rows="3" placeholder="댓글 내용을 입력하세요..." required></textarea>
+                        <textarea name="content" class="form-control" rows="3" placeholder="댓글 내용을 입력하세요..."
+                                  required></textarea>
                     </div>
                     <div class="col-md-2 d-grid">
                         <button type="submit" class="btn btn-primary" style="height: 100%;">등록</button>
@@ -59,28 +84,47 @@
             <hr>
 
             <ul class="list-group list-group-flush">
-                <li th:if="${#lists.isEmpty(replies)}" class="list-group-item text-center text-muted py-4">
+                <li th:if="${#lists.isEmpty(replies)}" class="list-group-item text-center text-muted py-5">
+                    <div class="mb-2">💬</div>
                     아직 댓글이 없습니다. 첫 번째 댓글을 남겨보세요!
                 </li>
 
-                <li th:each="reply : ${replies}" class="list-group-item">
-                    <div class="d-flex justify-content-between align-items-start">
-                        <div>
-                            <div class="fw-bold mb-1">
-                                <span th:if="${reply.author != null}" th:text="${reply.author.username}">작성자</span>
-                            </div>
-                            <div th:text="${reply.content}" class="text-break">내용</div>
-                        </div>
+                <li th:each="reply : ${replies}" class="list-group-item py-3">
+                    <a th:id="|reply_${reply.id}|"></a>
 
-                        <div class="d-flex gap-2" sec:authorize="isAuthenticated()"
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+
+            <span th:if="${reply.author != null}" class="fw-bold" style="font-size: 0.95rem;">
+                👤 <span th:text="${reply.author.username}">작성자</span>
+            </span>
+
+                        <span class="text-muted small"
+                              th:text="${#temporals.format(reply.createDate, 'yyyy-MM-dd HH:mm')}">
+                2026-01-05 14:00
+            </span>
+                    </div>
+
+                    <div th:text="${reply.content}" class="text-break mb-3" style="font-size: 1rem;">
+                        내용
+                    </div>
+
+                    <div class="d-flex justify-content-between align-items-center">
+
+                        <a th:href="@{/reply/vote/{id}(id=${reply.id})}"
+                           class="btn btn-sm btn-outline-danger d-flex align-items-center gap-1">
+                            <span>❤️</span>
+                            <span class="badge rounded-pill bg-danger" th:text="${#lists.size(reply.voter)}">0</span>
+                        </a>
+
+                        <div class="d-flex gap-1" sec:authorize="isAuthenticated()"
                              th:if="${reply.author != null and #authentication.name == reply.author.username}">
 
-                            <a th:href="@{/reply/edit/{id}(id=${reply.id})}" class="btn btn-sm btn-outline-secondary"
-                               style="font-size: 0.75rem;">수정</a>
+                            <a th:href="@{/reply/edit/{id}(id=${reply.id})}"
+                               class="btn btn-sm btn-outline-secondary">수정</a>
 
                             <form th:action="@{/post/{postId}/reply/delete/{replyId}(postId=${post.id}, replyId=${reply.id})}"
                                   method="post">
-                                <button type="submit" class="btn btn-sm btn-outline-danger" style="font-size: 0.75rem;"
+                                <button type="submit" class="btn btn-sm btn-outline-danger"
                                         onclick="return confirm('댓글을 삭제할까요?')">삭제
                                 </button>
                             </form>

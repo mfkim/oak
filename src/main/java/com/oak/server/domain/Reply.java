@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.Set;
 import java.time.LocalDateTime;
 
 @Getter
@@ -26,8 +27,12 @@ public class Reply {
     @ManyToOne
     private SiteUser author;
 
-    // 댓글 수정
+    // 수정
     public void update(String content) {
         this.content = content;
     }
+
+    // 추천
+    @ManyToMany
+    Set<SiteUser> voter;
 }

@@ -167,4 +167,29 @@ public class BoardController {
         replyService.delete(replyId);
         return "redirect:/post/" + postId;
     }
+
+    // 10. 게시글 추천 (GET)
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/post/vote/{id}")
+    public String postVote(Principal principal, @PathVariable("id") Long id) {
+        Post post = this.postService.findById(id);
+        SiteUser siteUser = this.userService.getUser(principal.getName());
+
+        this.postService.vote(post, siteUser);
+
+        return "redirect:/post/" + id;
+    }
+
+    // 11. 댓글 추천 (GET)
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/reply/vote/{id}")
+    public String replyVote(Principal principal, @PathVariable("id") Long id) {
+        Reply reply = this.replyService.findById(id);
+        SiteUser siteUser = this.userService.getUser(principal.getName());
+
+        this.replyService.vote(reply, siteUser);
+
+        return String.format("redirect:/post/%s#reply_%s",
+                reply.getPost().getId(), reply.getId());
+    }
 }

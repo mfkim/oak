@@ -57,4 +57,14 @@ public class ReplyService {
         Post post = postService.findById(postId);
         return post.getReplyList();
     }
+
+    // 6. 댓글 추천 기능 (토글)
+    public void vote(Reply reply, SiteUser siteUser) {
+        if (reply.getVoter().contains(siteUser)) {
+            reply.getVoter().remove(siteUser); // 취소
+        } else {
+            reply.getVoter().add(siteUser); // 추천
+        }
+        this.replyRepository.save(reply);
+    }
 }
