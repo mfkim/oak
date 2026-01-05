@@ -3,6 +3,7 @@ package com.oak.server.domain;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 
 import java.util.List;
 
@@ -15,17 +16,20 @@ public class SiteUser {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
-    @Column(unique = true) // 아이디 중복 금지
+    @Column(unique = true)
     private String username;
 
+    @JsonIgnore
     private String password;
 
-    @Column(unique = true) // 이메일 중복 금지
+    @Column(unique = true)
     private String email;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE)
     private List<Post> postList;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE)
     private List<Reply> replyList;
 }

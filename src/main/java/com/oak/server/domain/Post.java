@@ -1,5 +1,6 @@
 package com.oak.server.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -25,6 +26,7 @@ public class Post {
 
     private LocalDateTime createDate;
 
+    @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Reply> replyList;
 
@@ -33,12 +35,13 @@ public class Post {
 
     private LocalDateTime modifyDate;
 
+    @JsonIgnore
     @ManyToMany
     Set<SiteUser> voter;
 
     @Column(columnDefinition = "integer default 0", nullable = false)
     private int view;
 
-    private String fileName;    // 실제 저장된 파일명
-    private String filePath;    // 파일 접근 경로
+    private String fileName;
+    private String filePath;
 }
