@@ -20,7 +20,9 @@
 
                         <div class="mb-3">
                             <label for="title" class="form-label fw-bold">제목</label>
-                            <input type="text" th:field="*{title}" class="form-control" placeholder="제목을 입력하세요">
+                            <input type="text" th:field="*{title}" class="form-control"
+                                   th:classappend="${#fields.hasErrors('title')} ? 'is-invalid'" placeholder="제목을 입력하세요">
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('title')}" th:errors="*{title}"></div>
                         </div>
 
                         <div class="mb-3">
@@ -31,7 +33,9 @@
 
                         <div class="mb-4">
                             <label for="content" class="form-label fw-bold">내용</label>
-                            <textarea th:field="*{content}" class="form-control" rows="10" placeholder="내용을 자유롭게 적어주세요"></textarea>
+                            <textarea th:field="*{content}" class="form-control"
+                                      th:classappend="${#fields.hasErrors('content')} ? 'is-invalid'" rows="10" placeholder="내용을 자유롭게 적어주세요"></textarea>
+                            <div class="invalid-feedback" th:if="${#fields.hasErrors('content')}" th:errors="*{content}"></div>
                         </div>
 
                         <div class="d-flex justify-content-end">

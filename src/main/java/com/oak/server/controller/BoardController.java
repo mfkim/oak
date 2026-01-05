@@ -208,15 +208,14 @@ public class BoardController {
     @PostMapping("/post/write")
     public String postWrite(@Valid PostForm postForm, BindingResult bindingResult,
                             Principal principal,
-                            @RequestParam("thumbnail") MultipartFile thumbnail) throws IOException {
+                            @RequestParam("thumbnail") MultipartFile thumbnail, Model model) throws IOException {
 
         if (bindingResult.hasErrors()) {
-            return "post/post_form";
+            return "post/write";
         }
 
         SiteUser siteUser = this.userService.getUser(principal.getName());
 
-        // 서비스 호출 시 thumbnail 파일도 함께 넘겨줍니다.
         this.postService.create(postForm.getTitle(), postForm.getContent(), siteUser, thumbnail);
 
         return "redirect:/";
