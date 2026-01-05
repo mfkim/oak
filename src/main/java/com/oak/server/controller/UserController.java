@@ -1,5 +1,6 @@
 package com.oak.server.controller;
 
+import com.oak.server.domain.SiteUser;
 import com.oak.server.service.UserService;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -9,6 +10,11 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+
+import java.security.Principal;
+
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.ui.Model;
 
 @RequiredArgsConstructor
 @Controller
@@ -60,5 +66,14 @@ public class UserController {
     @GetMapping("/login")
     public String login() {
         return "login_form";
+    }
+
+    // 4. 프로필
+    @PreAuthorize("isAuthenticated()")
+    @GetMapping("/profile")
+    public String profile(Model model, Principal principal) {
+        SiteUser siteUser = this.userService.getUser(principal.getName());
+        model.addAttribute("user", siteUser);
+        return "user/profile";
     }
 }
