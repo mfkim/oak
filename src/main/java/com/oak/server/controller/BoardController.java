@@ -34,9 +34,15 @@ public class BoardController {
 
     // Home
     @GetMapping("/")
-    public String home(Model model, @RequestParam(value = "page", defaultValue = "0") int page) {
-        Page<Post> paging = postService.getList(page);
+    public String home(Model model,
+                       @RequestParam(value = "page", defaultValue = "0") int page,
+                       @RequestParam(value = "kw", defaultValue = "") String kw) {
+
+        Page<Post> paging = postService.getList(page, kw);
+
         model.addAttribute("paging", paging);
+        model.addAttribute("kw", kw);
+
         return "post/list";
     }
 

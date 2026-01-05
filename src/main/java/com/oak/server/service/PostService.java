@@ -34,12 +34,12 @@ public class PostService {
 
     // 2. 글 조회 (Read)
     @Transactional(readOnly = true)
-    public Page<Post> getList(int page) {
+    public Page<Post> getList(int page, String kw) {
         List<Sort.Order> sorts = new ArrayList<>();
-        sorts.add(Sort.Order.desc("id"));
-
+        sorts.add(Sort.Order.desc("createDate"));
         Pageable pageable = PageRequest.of(page, 10, Sort.by(sorts));
-        return postRepository.findAll(pageable);
+
+        return this.postRepository.findAllByKeyword(kw, pageable);
     }
 
     // 2-1. 글 조회 (Read) - API

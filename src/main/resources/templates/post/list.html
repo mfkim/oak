@@ -4,77 +4,73 @@
       xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout">
 
 <div layout:fragment="content">
-
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h2 class="fw-bold">참나무 게시판</h2>
-        <a th:href="@{/post/write}" class="btn btn-primary"
-           sec:authorize="isAuthenticated()">️✏️️ 새 글 쓰기</a>
+    </div>
+
+    <div class="row mb-3 align-items-center">
+        <div class="col-md-6">
+            <form th:action="@{/}" method="get">
+                <div class="input-group">
+                    <input type="text" name="kw" class="form-control" th:value="${kw}" placeholder="제목, 내용, 작성자로 검색해보세요">
+                    <button class="btn btn-outline-primary" type="submit">🔍 검색</button>
+                </div>
+            </form>
+        </div>
+        <div class="col-md-6 text-end">
+            <a th:href="@{/post/write}" class="btn btn-primary"
+               sec:authorize="isAuthenticated()">✏️ 새 글 쓰기</a>
+        </div>
     </div>
 
     <div class="card shadow-sm">
         <div class="card-body p-0">
-
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                 <tr>
                     <th style="width: 10%;" class="text-center">번호</th>
-                    <th style="width: 55%;">제목</th> <th style="width: 25%;" class="text-center">작성자</th> <th style="width: 10%;" class="text-center">조회수</th>
+                    <th style="width: 50%;">제목</th>
+                    <th style="width: 20%;" class="text-center">작성자</th>
+                    <th style="width: 10%;" class="text-center">조회수</th>
+                    <th style="width: 10%;" class="text-center">❤️</th>
                 </tr>
                 </thead>
-
                 <tbody>
                 <tr th:if="${paging.isEmpty()}">
-                    <td colspan="4" class="text-center py-5 text-muted">
-                        아직 작성된 게시글이 없습니다.
-                    </td>
+                    <td colspan="5" class="text-center py-5 text-muted">아직 작성된 게시글이 없습니다.</td>
                 </tr>
-
                 <tr th:each="post, loop : ${paging}">
                     <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}" class="text-center">1</td>
-
                     <td>
-                        <a th:href="@{/post/{id}(id=${post.id})}" th:text="${post.title}"
-                           class="text-decoration-none text-dark fw-bold">
-                            제목
-                        </a>
+                        <a th:href="@{/post/{id}(id=${post.id})}" th:text="${post.title}" class="text-decoration-none text-dark fw-bold">제목</a>
                     </td>
-
                     <td th:text="${post.author?.username}" class="text-center text-muted">작성자</td>
-
-                    <td class="text-center text-muted small">
-                        👀 <span th:text="${post.view}">0</span>
-                    </td>
+                    <td class="text-center text-muted small">👀 <span th:text="${post.view}">0</span></td>
+                    <td class="text-center text-muted small"><span th:text="${#lists.size(post.voter)}">0</span></td>
                 </tr>
                 </tbody>
             </table>
 
-<!--            Paging-->
-            <div th:if="${!paging.isEmpty()}" class="mt-4">
+            <div th:if="${!paging.isEmpty()}" class="mt-4 pb-3">
                 <ul class="pagination justify-content-center">
-
                     <li class="page-item" th:classappend="${!paging.hasPrevious} ? 'disabled'">
-                        <a class="page-link" th:href="@{|?page=${paging.number-1}|}">
+                        <a class="page-link" th:href="@{/(page=${paging.number - 1}, kw=${kw})}">
                             <span>&laquo;</span>
                         </a>
                     </li>
-
                     <li th:each="page: ${#numbers.sequence(0, paging.totalPages-1)}"
                         th:if="${page >= paging.number-5 and page <= paging.number+5}"
-                        th:classappend="${page == paging.number} ? 'active'"
-                        class="page-item">
-                        <a th:text="${page+1}" class="page-link" th:href="@{|?page=${page}|}">1</a>
+                        th:classappend="${page == paging.number} ? 'active'" class="page-item">
+                        <a th:text="${page+1}" class="page-link" th:href="@{/(page=${page}, kw=${kw})}">1</a>
                     </li>
-
                     <li class="page-item" th:classappend="${!paging.hasNext} ? 'disabled'">
-                        <a class="page-link" th:href="@{|?page=${paging.number+1}|}">
+                        <a class="page-link" th:href="@{/(page=${paging.number + 1}, kw=${kw})}">
                             <span>&raquo;</span>
                         </a>
                     </li>
                 </ul>
             </div>
-
         </div>
     </div>
-
 </div>
 </html>
