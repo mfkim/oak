@@ -41,9 +41,19 @@
                 </tr>
                 <tr th:each="post, loop : ${paging}">
                     <td th:text="${paging.getTotalElements - (paging.number * paging.size) - loop.index}" class="text-center">1</td>
+
                     <td>
-                        <a th:href="@{/post/{id}(id=${post.id})}" th:text="${post.title}" class="text-decoration-none text-dark fw-bold">제목</a>
+                        <a th:href="@{/post/{id}(id=${post.id})}" class="text-decoration-none text-dark fw-bold">
+                            <span th:text="${post.title}">제목</span>
+
+                            <span class="text-danger small ms-1"
+                                  th:if="${#lists.size(post.replyList) > 0}"
+                                  th:text="| [${#lists.size(post.replyList)}]|">
+                    [5]
+                </span>
+                        </a>
                     </td>
+
                     <td th:text="${post.author?.username}" class="text-center text-muted">작성자</td>
                     <td class="text-center text-muted small">👀 <span th:text="${post.view}">0</span></td>
                     <td class="text-center text-muted small"><span th:text="${#lists.size(post.voter)}">0</span></td>
