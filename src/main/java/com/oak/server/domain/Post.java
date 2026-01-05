@@ -38,4 +38,7 @@ public class Post {
 
     @Column(columnDefinition = "integer default 0", nullable = false)
     private int view;
+
+    private String fileName;    // 실제 저장된 파일명
+    private String filePath;    // 파일 접근 경로
 }

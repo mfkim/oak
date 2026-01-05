@@ -16,11 +16,13 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.http.HttpStatus;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 import jakarta.validation.Valid;
 import org.springframework.validation.BindingResult;
 import com.oak.server.controller.PostForm;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.List;
 
@@ -69,18 +71,18 @@ public class BoardController {
     }
 
     // 2. 작성된 글 저장 (POST)
-    @PreAuthorize("isAuthenticated()")
-    @PostMapping("/post/write")
-    public String write(@Valid PostForm postForm, BindingResult bindingResult, Principal principal) {
-        if (bindingResult.hasErrors()) {
-            return "post/write";
-        }
-
-        SiteUser siteUser = this.userService.getUser(principal.getName());
-        this.postService.write(postForm.getTitle(), postForm.getContent(), siteUser);
-
-        return "redirect:/";
-    }
+//    @PreAuthorize("isAuthenticated()")
+//    @PostMapping("/post/write")
+//    public String write(@Valid PostForm postForm, BindingResult bindingResult, Principal principal) {
+//        if (bindingResult.hasErrors()) {
+//            return "post/write";
+//        }
+//
+//        SiteUser siteUser = this.userService.getUser(principal.getName());
+//        this.postService.write(postForm.getTitle(), postForm.getContent(), siteUser);
+//
+//        return "redirect:/";
+//    }
 
     // 3. 수정 화면 (GET)
     @PreAuthorize("isAuthenticated()")
@@ -200,5 +202,23 @@ public class BoardController {
 
         return String.format("redirect:/post/%s#reply_%s",
                 reply.getPost().getId(), reply.getId());
+    }
+
+    @PreAuthorize("isAuthenticated()")
+    @PostMapping("/post/write")
+    public String postWrite(@Valid PostForm postForm, BindingResult bindingResult,
+                            Principal principal,
+                            @RequestParam("thumbnail") MultipartFile thumbnail) throws IOException {
+
+        if (bindingResult.hasErrors()) {
+            return "post/post_form";
+        }
+
+        SiteUser siteUser = this.userService.getUser(principal.getName());
+
+        // 서비스 호출 시 thumbnail 파일도 함께 넘겨줍니다.
+        this.postService.create(postForm.getTitle(), postForm.getContent(), siteUser, thumbnail);
+
+        return "redirect:/";
     }
 }

@@ -12,7 +12,7 @@
             <div class="card shadow-sm">
                 <div class="card-body p-4">
 
-                    <form th:action="@{/post/write}" th:object="${postForm}" method="post">
+                    <form th:action="@{/post/write}" th:object="${postForm}" method="post" enctype="multipart/form-data">
 
                         <div th:if="${#fields.hasAnyErrors()}">
                             <div class="alert alert-danger" role="alert" th:each="err : ${#fields.allErrors()}" th:text="${err}"></div>
@@ -21,6 +21,12 @@
                         <div class="mb-3">
                             <label for="title" class="form-label fw-bold">제목</label>
                             <input type="text" th:field="*{title}" class="form-control" placeholder="제목을 입력하세요">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="thumbnail" class="form-label fw-bold">📸 이미지 첨부</label>
+                            <input type="file" name="thumbnail" id="thumbnail" class="form-control">
+                            <div class="form-text">이미지 파일(jpg, png 등)만 업로드 가능합니다.</div>
                         </div>
 
                         <div class="mb-4">

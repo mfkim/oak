@@ -11,9 +11,15 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
+
+import org.springframework.web.multipart.MultipartFile;
+
 
 @RequiredArgsConstructor
 @Service
@@ -88,5 +94,28 @@ public class PostService {
     public void increaseView(Post post) {
         post.setView(post.getView() + 1);
         this.postRepository.save(post);
+    }
+
+    // 파일 저장
+    public void create(String title, String content, SiteUser user, MultipartFile file) throws IOException {
+        Post p = new Post();
+        p.setTitle(title);
+        p.setContent(content);
+        p.setCreateDate(LocalDateTime.now());
+        p.setAuthor(user);
+
+        if (file != null && !file.isEmpty()) {
+            String projectPath = System.getProperty("user.dir") + "/src/main/resources/static/files";
+            UUID uuid = UUID.randomUUID(); // 파일명 중복 방지용 랜덤 ID
+            String fileName = uuid + "_" + file.getOriginalFilename();
+
+            File saveFile = new File(projectPath, fileName);
+            file.transferTo(saveFile);
+
+            p.setFileName(fileName);
+            p.setFilePath("/files/" + fileName); // 웹 접근 경로
+        }
+
+        this.postRepository.save(p);
     }
 }

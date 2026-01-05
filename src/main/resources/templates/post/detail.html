@@ -28,6 +28,10 @@
             </div>
 
             <div class="mb-5">
+                <div th:if="${post.fileName != null}" class="mb-4 text-center bg-light rounded p-3">
+                    <img th:src="${post.filePath}" class="img-fluid rounded shadow-sm"
+                         style="max-height: 600px; object-fit: contain;" alt="첨부 이미지">
+                </div>
                 <p class="card-text text-break" th:text="${post.content}"
                    style="white-space: pre-wrap; line-height: 1.8; font-size: 1.05rem;">내용</p>
             </div>
