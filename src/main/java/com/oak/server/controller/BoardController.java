@@ -46,6 +46,9 @@ public class BoardController {
         Post post = postService.findById(id);
         model.addAttribute("post", post);
 
+        postService.increaseView(post);
+        model.addAttribute("post", post);
+
         List<Reply> replies = replyService.findAll(id);
         model.addAttribute("replies", replies);
 

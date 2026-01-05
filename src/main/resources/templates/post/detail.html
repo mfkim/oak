@@ -15,11 +15,14 @@
 
                 <div class="d-flex justify-content-between text-muted small">
                     <div>
-                        <span class="me-3">
-                            🖊️ <strong class="text-dark" th:if="${post.author != null}"
-                                       th:text="${post.author.username}">작성자</strong>
-                        </span>
-                        <span th:text="${#temporals.format(post.createDate, 'yyyy-MM-dd HH:mm')}">2026-01-05 12:00</span>
+                    <span class="me-3">
+                        🖊️ <strong class="text-dark" th:if="${post.author != null}" th:text="${post.author.username}">작성자</strong>
+                    </span>
+                        <span class="me-3" th:text="${#temporals.format(post.createDate, 'yyyy-MM-dd HH:mm')}">날짜</span>
+
+                        <span>
+                        👀 <span th:text="${post.view}">0</span>
+                    </span>
                     </div>
                 </div>
             </div>
@@ -59,6 +62,7 @@
 
 
     <div class="card shadow-sm">
+
         <div class="card-header bg-light">
             <h5 class="mb-0">💬 댓글 (<span th:text="${replies.size()}">0</span>)</h5>
         </div>
@@ -133,6 +137,7 @@
                 </li>
             </ul>
         </div>
+
     </div>
 
 </div>

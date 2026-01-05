@@ -13,17 +13,18 @@
 
     <div class="card shadow-sm">
         <div class="card-body p-0">
+
             <table class="table table-hover mb-0">
                 <thead class="table-light">
                 <tr>
                     <th style="width: 10%;" class="text-center">번호</th>
-                    <th style="width: 60%;">제목</th>
-                    <th style="width: 30%;" class="text-center">작성자</th>
+                    <th style="width: 55%;">제목</th> <th style="width: 25%;" class="text-center">작성자</th> <th style="width: 10%;" class="text-center">조회수</th>
                 </tr>
                 </thead>
+
                 <tbody>
                 <tr th:if="${paging.isEmpty()}">
-                    <td colspan="3" class="text-center py-5 text-muted">
+                    <td colspan="4" class="text-center py-5 text-muted">
                         아직 작성된 게시글이 없습니다.
                     </td>
                 </tr>
@@ -37,10 +38,17 @@
                             제목
                         </a>
                     </td>
+
                     <td th:text="${post.author?.username}" class="text-center text-muted">작성자</td>
+
+                    <td class="text-center text-muted small">
+                        👀 <span th:text="${post.view}">0</span>
+                    </td>
                 </tr>
                 </tbody>
             </table>
+
+<!--            Paging-->
             <div th:if="${!paging.isEmpty()}" class="mt-4">
                 <ul class="pagination justify-content-center">
 
@@ -62,9 +70,9 @@
                             <span>&raquo;</span>
                         </a>
                     </li>
-
                 </ul>
             </div>
+
         </div>
     </div>
 

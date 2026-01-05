@@ -82,4 +82,11 @@ public class PostService {
         }
         this.postRepository.save(post);
     }
+
+    // 조회수 카운트
+    @Transactional
+    public void increaseView(Post post) {
+        post.setView(post.getView() + 1);
+        this.postRepository.save(post);
+    }
 }
