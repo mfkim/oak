@@ -16,6 +16,7 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -29,26 +30,22 @@ public class SecurityConfig {
     @Bean
     SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http
-                // 1. CORS 설정 (리액트와 통신)
                 .cors(cors -> cors.configurationSource(corsConfigurationSource()))
-
-                // 2. CSRF 비활성화 (세션)
                 .csrf(csrf -> csrf.disable())
-
-                // 3. 세션 사용 안 함
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
-
-                // 4. Form 로그인, HttpBasic 로그인 비활성화
                 .formLogin(form -> form.disable())
                 .httpBasic(httpBasic -> httpBasic.disable())
 
-                // 5. URL별 권한 관리
                 .authorizeHttpRequests(authorize -> authorize
-                        .requestMatchers("/api/posts", "/api/posts/**").permitAll() // 게시글 조회는 누구나
-                        .requestMatchers("/api/auth/**").permitAll() // 로그인, 회원가입은 누구나
-                        .anyRequest().authenticated()) // 나머지는 로그인해야 가능
+                        // 1. GET 요청(글 목록, 상세 조회)은 누구나 가능
+                        .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**").permitAll()
 
-                // 6. JWT 필터를 먼저 실행하도록 설정
+                        // 2. 로그인/회원가입 요청도 누구나 가능
+                        .requestMatchers("/api/auth/**").permitAll()
+
+                        // 3. 나머지는 무조건 로그인해야 가능
+                        .anyRequest().authenticated())
+
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
