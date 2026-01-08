@@ -1,6 +1,5 @@
 package com.oak.server.domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -26,7 +25,6 @@ public class Post {
 
     private LocalDateTime createDate;
 
-    @JsonIgnore
     @OneToMany(mappedBy = "post", cascade = CascadeType.REMOVE)
     private List<Reply> replyList;
 
@@ -35,7 +33,6 @@ public class Post {
 
     private LocalDateTime modifyDate;
 
-    @JsonIgnore
     @ManyToMany
     Set<SiteUser> voter;
 

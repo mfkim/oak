@@ -1,5 +1,6 @@
 package com.oak.server.domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
@@ -22,6 +23,7 @@ public class Reply {
     private LocalDateTime createDate;
 
     @ManyToOne
+    @JsonIgnore
     private Post post;
 
     @ManyToOne

@@ -1,6 +1,7 @@
-import {useState, useEffect} from 'react';
+import {useState, useEffect, useCallback} from 'react';
 import {useParams, useNavigate} from 'react-router-dom';
 import axios from 'axios';
+import CommentSection from '../components/CommentSection';
 
 function PostDetail() {
   const {id} = useParams();
@@ -10,11 +11,17 @@ function PostDetail() {
   // 로그인한 사용자 정보 가져오기
   const currentUser = localStorage.getItem('username');
 
-  useEffect(() => {
+  // 게시글 데이터 불러오기
+  const fetchPost = useCallback(() => {
     axios.get(`/api/posts/${id}`)
       .then(res => setPost(res.data))
       .catch(err => console.error(err));
   }, [id]);
+
+  // 페이지가 처음 뜰 때 데이터 불러오기
+  useEffect(() => {
+    fetchPost();
+  }, [fetchPost]);
 
   const handleDelete = async () => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
@@ -42,7 +49,7 @@ function PostDetail() {
           ← 목록으로
         </button>
 
-        {/* ★ 작성자 본인일 때만 수정/삭제 버튼 표시 */}
+        {/* 작성자 본인일 때만 수정/삭제 버튼 표시 */}
         {currentUser === post.author.username && (
           <div className="flex gap-2">
             <button
@@ -61,7 +68,7 @@ function PostDetail() {
         )}
       </div>
 
-      {/* 게시글 내용 */}
+      {/* 게시글 내용 및 댓글 영역 */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">{post.title}</h1>
 
@@ -73,9 +80,16 @@ function PostDetail() {
           <span>조회수 {post.view}</span>
         </div>
 
-        <div className="prose prose-green max-w-none text-gray-700 leading-relaxed whitespace-pre-line">
+        <div className="prose prose-green max-w-none text-gray-700 leading-relaxed whitespace-pre-line mb-10">
           {post.content}
         </div>
+
+        {/* ★ 댓글 섹션 연결 */}
+        <CommentSection
+          postId={id}
+          replies={post.replyList || []} // 댓글 목록 전달 (없으면 빈 배열)
+          onCommentChange={fetchPost}    // 댓글 변경 시 부모에게 알림 (데이터 갱신용)
+        />
       </div>
     </div>
   );
