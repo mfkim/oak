@@ -139,4 +139,21 @@ public class BoardApiController {
         this.replyService.vote(reply, siteUser);
         return ResponseEntity.ok("댓글 추천 완료");
     }
+
+    //  테스트용 데이터 생성기
+    @GetMapping("/test/generate")
+    public ResponseEntity<?> generateTestData(Principal principal) {
+        // 1. 현재 로그인한 사람 정보 가져오기
+        SiteUser user = this.userService.getUser(principal.getName());
+
+        // 2. 글 반복해서 만들기
+        for (int i = 1; i <= 50; i++) {
+            String title = String.format("테스트 게시글 데이터입니다. [%03d]", i);
+            String content = "무한 스크롤 테스트를 위한 내용입니다. 🌲";
+
+            this.postService.write(title, content, user);
+        }
+
+        return ResponseEntity.ok("테스트 데이터 생성 완료! 홈으로 돌아가세요.");
+    }
 }
