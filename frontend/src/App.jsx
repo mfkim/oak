@@ -6,6 +6,7 @@ import PostDetail from './pages/PostDetail';
 import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Write from "./pages/Write.jsx";
+import Edit from "./pages/Edit.jsx";
 
 function App() {
   return (
@@ -20,7 +21,8 @@ function App() {
             <Route path="/login" element={<Login/>}/>
             <Route path="/signup" element={<Signup/>}/>
 
-            <Route path="/write" element={<Write />} />
+            <Route path="/write" element={<Write/>}/>
+            <Route path="/edit/:id" element={<Edit/>}/>
           </Routes>
         </main>
 

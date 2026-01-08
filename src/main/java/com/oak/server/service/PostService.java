@@ -10,6 +10,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
@@ -17,9 +18,6 @@ import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
-
-import org.springframework.web.multipart.MultipartFile;
-
 
 @RequiredArgsConstructor
 @Service
@@ -38,7 +36,7 @@ public class PostService {
         this.postRepository.save(post);
     }
 
-    // 2. 글 조회 (Read)
+    // 2. 글 조회 (Read - Paging)
     @Transactional(readOnly = true)
     public Page<Post> getList(int page, String kw) {
         List<Sort.Order> sorts = new ArrayList<>();
@@ -48,7 +46,7 @@ public class PostService {
         return this.postRepository.findAllByKeyword(kw, pageable);
     }
 
-    // 2-1. 글 조회 (Read) - API
+    // 2-1. 전체 글 조회 (API용)
     @Transactional(readOnly = true)
     public List<Post> findAll() {
         return postRepository.findAll();
@@ -61,42 +59,43 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
     }
 
-    // 4. 글 수정 (Update)
+    // ★ 4. 글 수정 (Update)
     @Transactional
-    public void edit(Long id, String title, String content) {
-        Post post = postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
-
+    public void modify(Post post, String title, String content) {
+        // 이미 컨트롤러에서 조회한 Post 객체를 받아와서 내용만 바꿉니다.
         post.setTitle(title);
         post.setContent(content);
+        post.setModifyDate(LocalDateTime.now()); // 수정 시간 갱신
+        this.postRepository.save(post);
     }
 
-    // 5. 글 삭제 (Delete)
+    // ★ 5. 글 삭제 (Delete)
     @Transactional
-    public void delete(Long id) {
-        postRepository.deleteById(id);
+    public void delete(Post post) {
+        // 이미 컨트롤러에서 조회한 Post 객체를 삭제합니다.
+        this.postRepository.delete(post);
     }
 
     // 6. 글 추천
+    @Transactional
     public void vote(Post post, SiteUser siteUser) {
         if (post.getVoter().contains(siteUser)) {
-            // 1. 이미 추천한 사람이라면 -> 추천 취소 (삭제)
-            post.getVoter().remove(siteUser);
+            post.getVoter().remove(siteUser); // 추천 취소
         } else {
-            // 2. 추천하지 않은 사람이라면 -> 추천 (추가)
-            post.getVoter().add(siteUser);
+            post.getVoter().add(siteUser); // 추천
         }
         this.postRepository.save(post);
     }
 
-    // 조회수 카운트
+    // 7. 조회수 증가
     @Transactional
     public void increaseView(Post post) {
         post.setView(post.getView() + 1);
         this.postRepository.save(post);
     }
 
-    // 파일 저장
+    // 파일 업로드 포함 글쓰기
+    @Transactional
     public void create(String title, String content, SiteUser user, MultipartFile file) throws IOException {
         Post p = new Post();
         p.setTitle(title);
@@ -106,14 +105,14 @@ public class PostService {
 
         if (file != null && !file.isEmpty()) {
             String projectPath = System.getProperty("user.dir") + "/src/main/resources/static/files";
-            UUID uuid = UUID.randomUUID(); // 파일명 중복 방지용 랜덤 ID
+            UUID uuid = UUID.randomUUID();
             String fileName = uuid + "_" + file.getOriginalFilename();
 
             File saveFile = new File(projectPath, fileName);
             file.transferTo(saveFile);
 
             p.setFileName(fileName);
-            p.setFilePath("/files/" + fileName); // 웹 접근 경로
+            p.setFilePath("/files/" + fileName);
         }
 
         this.postRepository.save(p);

@@ -1,42 +1,72 @@
 import {useState, useEffect} from 'react';
-import {useParams, useNavigate} from 'react-router-dom'; // URL 파라미터 가져오기, 뒤로가기
+import {useParams, useNavigate} from 'react-router-dom';
 import axios from 'axios';
 
 function PostDetail() {
-  const {id} = useParams(); // URL에서 { id } 부분을 꺼내옵니다.
+  const {id} = useParams();
   const navigate = useNavigate();
-  const [post, setPost] = useState(null); // 초기값은 null (로딩 중)
+  const [post, setPost] = useState(null);
+
+  // 로그인한 사용자 정보 가져오기
+  const currentUser = localStorage.getItem('username');
 
   useEffect(() => {
-    // 상세 조회 API 호출
     axios.get(`/api/posts/${id}`)
       .then(res => setPost(res.data))
       .catch(err => console.error(err));
   }, [id]);
 
-  // 데이터가 아직 안 왔으면 로딩 표시
-  if (!post) {
-    return <div className="text-center py-20 text-gray-500">데이터를 불러오는 중입니다... ⏳</div>;
-  }
+  const handleDelete = async () => {
+    if (!window.confirm('정말 삭제하시겠습니까?')) return;
+
+    const token = localStorage.getItem('token');
+    try {
+      await axios.delete(`/api/posts/${id}`, {
+        headers: {Authorization: `Bearer ${token}`}
+      });
+      alert('삭제되었습니다.');
+      navigate('/');
+    } catch (error) {
+      console.error(error);
+      alert('삭제 권한이 없거나 오류가 발생했습니다.');
+    }
+  };
+
+  if (!post) return <div className="text-center py-20">로딩 중... ⏳</div>;
 
   return (
     <div className="max-w-3xl mx-auto">
-      {/* 뒤로가기 버튼 */}
-      <button
-        onClick={() => navigate(-1)}
-        className="mb-6 text-gray-500 hover:text-green-700 flex items-center gap-1 transition-colors"
-      >
-        ← 목록으로 돌아가기
-      </button>
+      {/* 상단 네비게이션 */}
+      <div className="flex justify-between items-center mb-6">
+        <button onClick={() => navigate(-1)} className="text-gray-500 hover:text-green-700">
+          ← 목록으로
+        </button>
 
-      {/* 게시글 본문 */}
+        {/* ★ 작성자 본인일 때만 수정/삭제 버튼 표시 */}
+        {currentUser === post.author.username && (
+          <div className="flex gap-2">
+            <button
+              onClick={() => navigate(`/edit/${id}`)}
+              className="bg-gray-100 hover:bg-gray-200 text-gray-700 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              수정
+            </button>
+            <button
+              onClick={handleDelete}
+              className="bg-red-50 hover:bg-red-100 text-red-600 px-4 py-2 rounded-lg text-sm font-medium transition-colors"
+            >
+              삭제
+            </button>
+          </div>
+        )}
+      </div>
+
+      {/* 게시글 내용 */}
       <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden p-8">
         <h1 className="text-3xl font-bold text-gray-900 mb-4">{post.title}</h1>
 
         <div className="flex items-center gap-4 text-sm text-gray-500 border-b border-gray-100 pb-6 mb-6">
-          <span className="flex items-center gap-1">
-            👤 <span className="font-medium text-gray-700">{post.author.username}</span>
-          </span>
+          <span>👤 {post.author.username}</span>
           <span>•</span>
           <span>{new Date(post.createDate).toLocaleString()}</span>
           <span>•</span>
