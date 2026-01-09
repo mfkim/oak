@@ -4,10 +4,10 @@ import com.oak.server.domain.Post;
 import com.oak.server.domain.Reply;
 import com.oak.server.domain.SiteUser;
 import com.oak.server.dto.PostCreateRequest;
-import com.oak.server.dto.PostModifyRequest; // ★ 수정용 DTO
-import com.oak.server.dto.ReplyRequest;      // ★ 댓글용 DTO
+import com.oak.server.dto.PostModifyRequest;
+import com.oak.server.dto.ReplyRequest;
 import com.oak.server.service.PostService;
-import com.oak.server.service.ReplyService;   // ★ 댓글 서비스
+import com.oak.server.service.ReplyService;
 import com.oak.server.service.UserService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -17,7 +17,6 @@ import org.springframework.web.bind.annotation.*;
 import org.springframework.web.server.ResponseStatusException;
 
 import java.security.Principal;
-import java.util.List;
 
 @RequiredArgsConstructor
 @RestController
@@ -51,44 +50,38 @@ public class BoardApiController {
         return ResponseEntity.ok("글 작성 성공");
     }
 
-    // 4. 게시글 수정 API (PUT)
+    // 4. 게시글 수정 API
     @PutMapping("/{id}")
     public ResponseEntity<?> modify(@PathVariable Long id,
                                     @RequestBody PostModifyRequest request,
                                     Principal principal) {
         Post post = this.postService.findById(id);
-
-        // 작성자 본인 확인
         if (!post.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
         }
-
         this.postService.modify(post, request.getTitle(), request.getContent());
         return ResponseEntity.ok("글 수정 성공");
     }
 
-    // 5. 게시글 삭제 API (DELETE)
+    // 5. 게시글 삭제 API
     @DeleteMapping("/{id}")
     public ResponseEntity<?> delete(@PathVariable Long id, Principal principal) {
         Post post = this.postService.findById(id);
-
-        // 작성자 본인 확인
         if (!post.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제 권한이 없습니다.");
         }
-
         this.postService.delete(post);
         return ResponseEntity.ok("글 삭제 성공");
     }
 
     // 6. 게시글 추천 API
-    @PostMapping("/{id}/vote")
+    @PostMapping("/{id}/like")
     public ResponseEntity<?> postVote(@PathVariable Long id, Principal principal) {
         Post post = this.postService.findById(id);
         SiteUser siteUser = this.userService.getUser(principal.getName());
 
         this.postService.vote(post, siteUser);
-        return ResponseEntity.ok("추천 완료");
+        return ResponseEntity.ok("추천 처리 완료");
     }
 
     // 7. 댓글 작성 API
@@ -97,7 +90,6 @@ public class BoardApiController {
                                          @RequestBody ReplyRequest request,
                                          Principal principal) {
         SiteUser siteUser = this.userService.getUser(principal.getName());
-        // ReplyService의 메서드 이름이 write인지 create인지 확인 필요 (여기선 write로 가정)
         this.replyService.write(id, request.getContent(), siteUser);
         return ResponseEntity.ok("댓글 작성 성공");
     }
@@ -108,11 +100,9 @@ public class BoardApiController {
                                          @RequestBody ReplyRequest request,
                                          Principal principal) {
         Reply reply = this.replyService.findById(replyId);
-
         if (!reply.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
         }
-
         this.replyService.edit(replyId, request.getContent());
         return ResponseEntity.ok("댓글 수정 성공");
     }
@@ -121,11 +111,9 @@ public class BoardApiController {
     @DeleteMapping("/replies/{replyId}")
     public ResponseEntity<?> deleteReply(@PathVariable Long replyId, Principal principal) {
         Reply reply = this.replyService.findById(replyId);
-
         if (!reply.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "삭제 권한이 없습니다.");
         }
-
         this.replyService.delete(replyId);
         return ResponseEntity.ok("댓글 삭제 성공");
     }
@@ -140,20 +128,15 @@ public class BoardApiController {
         return ResponseEntity.ok("댓글 추천 완료");
     }
 
-    //  테스트용 데이터 생성기
+    // 테스트용 데이터 생성기
     @GetMapping("/test/generate")
     public ResponseEntity<?> generateTestData(Principal principal) {
-        // 1. 현재 로그인한 사람 정보 가져오기
         SiteUser user = this.userService.getUser(principal.getName());
-
-        // 2. 글 반복해서 만들기
         for (int i = 1; i <= 50; i++) {
             String title = String.format("테스트 게시글 데이터입니다. [%03d]", i);
             String content = "무한 스크롤 테스트를 위한 내용입니다. 🌲";
-
             this.postService.write(title, content, user);
         }
-
-        return ResponseEntity.ok("테스트 데이터 생성 완료! 홈으로 돌아가세요.");
+        return ResponseEntity.ok("테스트 데이터 생성 완료!");
     }
 }

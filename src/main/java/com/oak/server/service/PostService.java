@@ -59,20 +59,18 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
     }
 
-    // ★ 4. 글 수정 (Update)
+    // 4. 글 수정 (Update)
     @Transactional
     public void modify(Post post, String title, String content) {
-        // 이미 컨트롤러에서 조회한 Post 객체를 받아와서 내용만 바꿉니다.
         post.setTitle(title);
         post.setContent(content);
         post.setModifyDate(LocalDateTime.now()); // 수정 시간 갱신
         this.postRepository.save(post);
     }
 
-    // ★ 5. 글 삭제 (Delete)
+    // 5. 글 삭제 (Delete)
     @Transactional
     public void delete(Post post) {
-        // 이미 컨트롤러에서 조회한 Post 객체를 삭제합니다.
         this.postRepository.delete(post);
     }
 
@@ -80,9 +78,9 @@ public class PostService {
     @Transactional
     public void vote(Post post, SiteUser siteUser) {
         if (post.getVoter().contains(siteUser)) {
-            post.getVoter().remove(siteUser); // 추천 취소
+            post.getVoter().remove(siteUser);
         } else {
-            post.getVoter().add(siteUser); // 추천
+            post.getVoter().add(siteUser);
         }
         this.postRepository.save(post);
     }

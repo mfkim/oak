@@ -23,6 +23,32 @@ function PostDetail() {
     fetchPost();
   }, [fetchPost]);
 
+  // 게시글 추천 기능
+  const handleLike = async () => {
+    const token = localStorage.getItem('token');
+
+    // 1. 비로그인 상태 체크
+    if (!token) {
+      alert('로그인이 필요한 기능입니다.');
+      navigate('/login');
+      return;
+    }
+
+    try {
+      // 2. 좋아요 API 호출 (토글 방식)
+      await axios.post(`/api/posts/${id}/like`, {}, {
+        headers: {Authorization: `Bearer ${token}`}
+      });
+
+      // 3. 데이터 갱신
+      fetchPost();
+
+    } catch (error) {
+      console.error(error);
+      alert('오류가 발생했습니다.');
+    }
+  };
+
   const handleDelete = async () => {
     if (!window.confirm('정말 삭제하시겠습니까?')) return;
 
@@ -40,6 +66,9 @@ function PostDetail() {
   };
 
   if (!post) return <div className="text-center py-20">로딩 중... ⏳</div>;
+
+  // 내가 좋아요를 눌렀는지 확인
+  const isLiked = post.voter?.some(v => v.username === currentUser);
 
   return (
     <div className="max-w-3xl mx-auto">
@@ -78,17 +107,35 @@ function PostDetail() {
           <span>{new Date(post.createDate).toLocaleString()}</span>
           <span>•</span>
           <span>조회수 {post.view}</span>
+
+          {/* ★ 좋아요 버튼 UI */}
+          <button
+            onClick={handleLike}
+            className={`flex items-center gap-1 px-3 py-1 rounded-full border transition-all ml-auto ${
+              isLiked
+                ? 'bg-red-50 border-red-200 text-red-600' // 좋아요 눌렀을 때 (빨강)
+                : 'bg-white border-gray-200 text-gray-500 hover:bg-gray-50' // 안 눌렀을 때 (회색)
+            }`}
+          >
+            {/* 하트 아이콘 */}
+            <span className="text-lg">{isLiked ? '❤️' : '🤍'}</span>
+
+            {/* 좋아요 개수 */}
+            <span className="font-bold">
+              {post.voter ? post.voter.length : 0}
+            </span>
+          </button>
         </div>
 
         <div className="prose prose-green max-w-none text-gray-700 leading-relaxed whitespace-pre-line mb-10">
           {post.content}
         </div>
 
-        {/* ★ 댓글 섹션 연결 */}
+        {/* 댓글 섹션 연결 */}
         <CommentSection
           postId={id}
-          replies={post.replyList || []} // 댓글 목록 전달 (없으면 빈 배열)
-          onCommentChange={fetchPost}    // 댓글 변경 시 부모에게 알림 (데이터 갱신용)
+          replies={post.replyList || []}
+          onCommentChange={fetchPost}
         />
       </div>
     </div>
