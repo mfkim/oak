@@ -59,12 +59,31 @@ public class PostService {
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 글입니다."));
     }
 
-    // 4. 글 수정 (Update)
+    // 4. 글 수정
     @Transactional
-    public void modify(Post post, String title, String content) {
+    public void modify(Post post, String title, String content, MultipartFile file, boolean isImageDeleted) throws IOException {
         post.setTitle(title);
         post.setContent(content);
-        post.setModifyDate(LocalDateTime.now()); // 수정 시간 갱신
+        post.setModifyDate(LocalDateTime.now());
+
+        // 새 파일이 들어온 경우 (교체)
+        if (file != null && !file.isEmpty()) {
+            String projectPath = System.getProperty("user.dir") + "/src/main/resources/static/files";
+            UUID uuid = UUID.randomUUID();
+            String fileName = uuid + "_" + file.getOriginalFilename();
+
+            File saveFile = new File(projectPath, fileName);
+            file.transferTo(saveFile);
+
+            post.setFileName(fileName);
+            post.setFilePath("/files/" + fileName);
+        }
+        // 새 파일은 없는데, 삭제하겠다고 한 경우 (삭제)
+        else if (isImageDeleted) {
+            post.setFileName(null);
+            post.setFilePath(null);
+        }
+
         this.postRepository.save(post);
     }
 

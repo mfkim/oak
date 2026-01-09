@@ -4,6 +4,7 @@ import com.oak.server.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -16,7 +17,6 @@ import org.springframework.security.web.authentication.UsernamePasswordAuthentic
 import org.springframework.web.cors.CorsConfiguration;
 import org.springframework.web.cors.CorsConfigurationSource;
 import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
-import org.springframework.http.HttpMethod;
 
 import java.util.List;
 
@@ -37,13 +37,19 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
 
                 .authorizeHttpRequests(authorize -> authorize
-                        // 1. GET 요청(글 목록, 상세 조회)은 누구나 가능
+                        // 이미지 파일 접근 허용 (이게 없어서 이미지가 403 뜸)
+                        .requestMatchers("/files/**").permitAll()
+
+                        // 로그인/회원가입 요청 허용
+                        .requestMatchers("/api/auth/**", "/api/users/**").permitAll()
+
+                        // 게시글 조회(GET)는 누구나 가능 (목록, 상세 보기)
                         .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**").permitAll()
 
-                        // 2. 로그인/회원가입 요청도 누구나 가능
-                        .requestMatchers("/api/auth/**").permitAll()
+                        // 테스트 데이터 생성기 허용
+                        .requestMatchers("/api/posts/test/generate").permitAll()
 
-                        // 3. 나머지는 무조건 로그인해야 가능
+                        // 나머지는 무조건 로그인(인증)
                         .anyRequest().authenticated())
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -55,9 +61,13 @@ public class SecurityConfig {
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
+        // 프론트엔드 주소
         config.setAllowedOrigins(List.of("http://localhost:5173"));
+        // 모든 HTTP
         config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
+        // 모든 헤더
         config.setAllowedHeaders(List.of("*"));
+        // 쿠키나 인증 정보 포함
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

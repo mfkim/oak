@@ -1,11 +1,12 @@
-import { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
+import {useState, useEffect} from 'react';
+import {useNavigate} from 'react-router-dom';
 import axios from 'axios';
 
 function Write() {
   const navigate = useNavigate();
   const [title, setTitle] = useState('');
   const [content, setContent] = useState('');
+  const [file, setFile] = useState(null);
 
   // 1. 로그인 여부 체크
   useEffect(() => {
@@ -16,24 +17,36 @@ function Write() {
     }
   }, [navigate]);
 
+  // 2. 파일 선택 핸들러
+  const handleFileChange = (e) => {
+    if (e.target.files) {
+      setFile(e.target.files[0]);
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     const token = localStorage.getItem('token');
 
+    // 3. FormData 객체 생성 (파일 전송)
+    const formData = new FormData();
+    formData.append('title', title);
+    formData.append('content', content);
+
+    // 파일이 있을 때만 추가
+    if (file) {
+      formData.append('file', file);
+    }
+
     try {
-      // 2. 서버로 데이터 전송 (헤더에 토큰 포함)
-      await axios.post('/api/posts',
-        {
-          title: title,
-          content: content
-        },
-        {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
+      // 4. 서버로 데이터 전송 (JSON 객체 대신 formData 전송)
+      // axios가 formData를 감지하면 자동으로 Content-Type을 설정
+      await axios.post('/api/posts', formData, {
+        headers: {
+          Authorization: `Bearer ${token}`
         }
-      );
+      });
 
       alert('글 작성이 완료되었습니다! 🌲');
       navigate('/');
@@ -76,6 +89,17 @@ function Write() {
               className="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-green-500 focus:border-transparent outline-none transition-all h-64 resize-none"
               placeholder="어떤 이야기를 나누고 싶으신가요?"
               required
+            />
+          </div>
+
+          {/* 파일 업로드 UI */}
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">이미지 첨부</label>
+            <input
+              type="file"
+              accept="image/*"
+              onChange={handleFileChange}
+              className="w-full text-sm text-gray-500 file:mr-4 file:py-2 file:px-4 file:rounded-full file:border-0 file:text-sm file:font-semibold file:bg-green-50 file:text-green-700 hover:file:bg-green-100 transition-colors cursor-pointer"
             />
           </div>
 

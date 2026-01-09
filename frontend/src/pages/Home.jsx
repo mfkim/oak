@@ -12,9 +12,7 @@ function Home() {
   const [kw, setKw] = useState("");
   const [inputText, setInputText] = useState("");
 
-  // 로그인한 사용자 정보 (좋아요 확인)
   const currentUser = localStorage.getItem('username');
-
   const observerTarget = useRef(null);
 
   const fetchPosts = useCallback(async () => {
@@ -66,7 +64,6 @@ function Home() {
     setKw(inputText);
   };
 
-  // 좋아요
   const handleLike = async (e, postId) => {
     e.preventDefault();
     e.stopPropagation();
@@ -79,12 +76,10 @@ function Home() {
     }
 
     try {
-      // 1. API 호출
       await axios.post(`/api/posts/${postId}/like`, {}, {
         headers: {Authorization: `Bearer ${token}`}
       });
 
-      // 2. 화면 즉시 갱신 (새로고침 없이 로컬 State만 변경)
       setPosts(prevPosts => prevPosts.map(post => {
         if (post.id === postId) {
           const isLiked = post.voter?.some(v => v.username === currentUser);
@@ -137,9 +132,23 @@ function Home() {
               <Link to={`/post/${post.id}`} key={post.id} className="block group">
                 <div
                   className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden hover:shadow-md hover:-translate-y-0.5 transition-all duration-300">
-                  <div
-                    className="h-32 bg-green-50 flex items-center justify-center text-green-200 text-4xl group-hover:bg-green-100 transition-colors">
 
+                  {/* 썸네일 영역 */}
+                  <div className="h-48 overflow-hidden bg-gray-100 relative">
+                    {post.filePath ? (
+                      // 1. 이미지가 있을 경우
+                      <img
+                        src={`http://localhost:8080${post.filePath}`}
+                        alt={post.title}
+                        className="w-full h-full object-cover group-hover:scale-105 transition-transform duration-500"
+                      />
+                    ) : (
+                      // 2. 이미지가 없을 경우
+                      <div
+                        className="w-full h-full bg-green-50 flex items-center justify-center text-green-200 text-5xl group-hover:bg-green-100 transition-colors">
+
+                      </div>
+                    )}
                   </div>
 
                   <div className="p-5">

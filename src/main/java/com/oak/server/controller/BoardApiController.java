@@ -14,8 +14,10 @@ import org.springframework.data.domain.Page;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.server.ResponseStatusException;
 
+import java.io.IOException;
 import java.security.Principal;
 
 @RequiredArgsConstructor
@@ -44,22 +46,37 @@ public class BoardApiController {
 
     // 3. 게시글 등록 API
     @PostMapping("")
-    public ResponseEntity<?> create(@RequestBody PostCreateRequest request, Principal principal) {
+    public ResponseEntity<?> create(
+            @RequestParam("title") String title,
+            @RequestParam("content") String content,
+            @RequestParam(value = "file", required = false) MultipartFile file,
+            Principal principal) throws IOException {
+
         SiteUser author = this.userService.getUser(principal.getName());
-        this.postService.write(request.getTitle(), request.getContent(), author);
+
+        this.postService.create(title, content, author, file);
+
         return ResponseEntity.ok("글 작성 성공");
     }
 
     // 4. 게시글 수정 API
     @PutMapping("/{id}")
     public ResponseEntity<?> modify(@PathVariable Long id,
-                                    @RequestBody PostModifyRequest request,
-                                    Principal principal) {
+                                    @RequestParam("title") String title,
+                                    @RequestParam("content") String content,
+                                    @RequestParam(value = "file", required = false) MultipartFile file,
+                                    @RequestParam(value = "isImageDeleted", defaultValue = "false") boolean isImageDeleted,
+                                    Principal principal) throws IOException {
+
         Post post = this.postService.findById(id);
+
         if (!post.getAuthor().getUsername().equals(principal.getName())) {
             throw new ResponseStatusException(HttpStatus.BAD_REQUEST, "수정 권한이 없습니다.");
         }
-        this.postService.modify(post, request.getTitle(), request.getContent());
+
+        // 서비스 호출 시 isImageDeleted 전달
+        this.postService.modify(post, title, content, file, isImageDeleted);
+
         return ResponseEntity.ok("글 수정 성공");
     }
 

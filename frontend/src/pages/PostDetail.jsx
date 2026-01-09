@@ -127,6 +127,17 @@ function PostDetail() {
           </button>
         </div>
 
+        {/* ★ 이미지 표시 영역 (파일이 있을 때만 렌더링) */}
+        {post.filePath && (
+          <div className="mb-8 rounded-xl overflow-hidden border border-gray-100">
+            <img
+              src={`http://localhost:8080${post.filePath}`}
+              alt="게시글 첨부 이미지"
+              className="w-full h-auto object-cover"
+            />
+          </div>
+        )}
+
         <div className="prose prose-green max-w-none text-gray-700 leading-relaxed whitespace-pre-line mb-10">
           {post.content}
         </div>
