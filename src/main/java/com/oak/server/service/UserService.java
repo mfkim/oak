@@ -1,6 +1,8 @@
 package com.oak.server.service;
 
+import com.oak.server.domain.Post;
 import com.oak.server.domain.SiteUser;
+import com.oak.server.repository.PostRepository;
 import com.oak.server.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.password.PasswordEncoder;
@@ -10,6 +12,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -18,6 +21,7 @@ import java.util.UUID;
 public class UserService {
 
     private final UserRepository userRepository;
+    private final PostRepository postRepository;
     private final PasswordEncoder passwordEncoder;
 
     public SiteUser create(String username, String email, String password) {
@@ -62,5 +66,38 @@ public class UserService {
         }
 
         return this.userRepository.save(user);
+    }
+
+    // 비밀번호 변경
+    public void updatePassword(String username, String oldPassword, String newPassword) {
+        SiteUser user = this.getUser(username);
+
+        // 현재 비밀번호가 맞는지 확인
+        if (!passwordEncoder.matches(oldPassword, user.getPassword())) {
+            throw new IllegalArgumentException("현재 비밀번호가 일치하지 않습니다.");
+        }
+
+        // 새 비밀번호로 변경 (암호화)
+        user.setPassword(passwordEncoder.encode(newPassword));
+        this.userRepository.save(user);
+    }
+
+    // 회원 탈퇴
+    @Transactional
+    public void delete(String username, String password) {
+        SiteUser user = this.getUser(username);
+
+        if (!passwordEncoder.matches(password, user.getPassword())) {
+            throw new IllegalArgumentException("비밀번호가 일치하지 않습니다.");
+        }
+
+        List<Post> likedPosts = postRepository.findByVoterContains(user);
+        for (Post post : likedPosts) {
+            post.getVoter().remove(user);
+            postRepository.save(post);
+        }
+
+        // 사용자 삭제 (작성한 글/댓글은 Cascade로 자동 삭제)
+        this.userRepository.delete(user);
     }
 }

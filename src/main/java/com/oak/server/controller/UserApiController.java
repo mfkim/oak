@@ -3,9 +3,7 @@ package com.oak.server.controller;
 import com.oak.server.domain.Post;
 import com.oak.server.domain.Reply;
 import com.oak.server.domain.SiteUser;
-import com.oak.server.dto.UserLoginRequest;
-import com.oak.server.dto.UserLoginResponse;
-import com.oak.server.dto.UserSignupRequest;
+import com.oak.server.dto.*;
 import com.oak.server.jwt.JwtTokenProvider;
 import com.oak.server.service.PostService;
 import com.oak.server.service.ReplyService;
@@ -115,5 +113,35 @@ public class UserApiController {
     public ResponseEntity<List<Post>> getMyLikes(Principal principal) {
         SiteUser user = userService.getUser(principal.getName());
         return ResponseEntity.ok(postService.getMyLikedPosts(user));
+    }
+
+    // 8. 비밀번호 변경 API
+    @PutMapping("/users/password")
+    public ResponseEntity<?> updatePassword(@RequestBody UserPasswordUpdateRequest request, Principal principal) {
+
+        // 새 비밀번호와 확인이 일치하는지 검사
+        if (!request.getNewPassword().equals(request.getNewPasswordCheck())) {
+            return ResponseEntity.badRequest().body("새 비밀번호가 서로 일치하지 않습니다.");
+        }
+
+        try {
+            userService.updatePassword(principal.getName(), request.getOldPassword(), request.getNewPassword());
+            return ResponseEntity.ok("비밀번호가 변경되었습니다.");
+
+        } catch (IllegalArgumentException e) {
+            // 현재 비밀번호가 틀렸을 때
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+
+    // 9. 회원 탈퇴 API
+    @DeleteMapping("/users/me")
+    public ResponseEntity<?> withdraw(@RequestBody UserWithdrawRequest request, Principal principal) {
+        try {
+            userService.delete(principal.getName(), request.getPassword());
+            return ResponseEntity.ok("회원 탈퇴가 완료되었습니다.");
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

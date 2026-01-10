@@ -37,19 +37,16 @@ public class SecurityConfig {
                 .httpBasic(httpBasic -> httpBasic.disable())
 
                 .authorizeHttpRequests(authorize -> authorize
-                        // 이미지 파일 접근 허용 (이게 없어서 이미지가 403 뜸)
                         .requestMatchers("/files/**").permitAll()
-
-                        // 로그인/회원가입 요청 허용
-                        .requestMatchers("/api/auth/**", "/api/users/**").permitAll()
-
-                        // 게시글 조회(GET)는 누구나 가능 (목록, 상세 보기)
-                        .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**").permitAll()
-
-                        // 테스트 데이터 생성기 허용
+                        .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/posts/test/generate").permitAll()
 
-                        // 나머지는 무조건 로그인(인증)
+                        // GET 메서드 지정 방식
+                        .requestMatchers(HttpMethod.GET, "/api/posts", "/api/posts/**").permitAll()
+
+                        // OPTIONS(Preflight) 허용
+                        .requestMatchers(HttpMethod.OPTIONS, "/**").permitAll()
+
                         .anyRequest().authenticated())
 
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
@@ -57,17 +54,12 @@ public class SecurityConfig {
         return http.build();
     }
 
-    // 리액트(5173)가 스프링(8080)에 접근할 수 있게 허용
     @Bean
     public CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration config = new CorsConfiguration();
-        // 프론트엔드 주소
         config.setAllowedOrigins(List.of("http://localhost:5173"));
-        // 모든 HTTP
-        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
-        // 모든 헤더
+        config.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "PATCH", "OPTIONS"));
         config.setAllowedHeaders(List.of("*"));
-        // 쿠키나 인증 정보 포함
         config.setAllowCredentials(true);
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
