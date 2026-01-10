@@ -102,7 +102,18 @@ function PostDetail() {
         <h1 className="text-3xl font-bold text-gray-900 mb-4">{post.title}</h1>
 
         <div className="flex items-center gap-4 text-sm text-gray-500 border-b border-gray-100 pb-6 mb-6">
-          <span>👤 {post.author.username}</span>
+          <div className="flex items-center gap-2">
+            {post.author.profileImg ? (
+              <img
+                src={`http://localhost:8080${post.author.profileImg}`}
+                alt="Author"
+                className="w-8 h-8 rounded-full object-cover border border-gray-200"
+              />
+            ) : (
+              <span className="text-xl">👤</span>
+            )}
+            <span className="font-bold text-gray-800">{post.author.username}</span>
+          </div>
           <span>•</span>
           <span>{new Date(post.createDate).toLocaleString()}</span>
           <span>•</span>

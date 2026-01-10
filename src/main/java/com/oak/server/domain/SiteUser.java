@@ -25,6 +25,8 @@ public class SiteUser {
     @Column(unique = true)
     private String email;
 
+    private String profileImg;
+
     @JsonIgnore
     @OneToMany(mappedBy = "author", cascade = CascadeType.REMOVE)
     private List<Post> postList;

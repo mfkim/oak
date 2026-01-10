@@ -169,8 +169,19 @@ function Home() {
 
                     <div
                       className="flex items-center justify-between text-xs text-gray-400 border-t border-gray-50 pt-3">
-                      <span className="flex items-center gap-1">
-                        👤 {post.author ? post.author.username : '익명'}
+                      <span className="flex items-center gap-2">
+                        {post.author && post.author.profileImg ? (
+                          <img
+                            src={`http://localhost:8080${post.author.profileImg}`}
+                            alt="Author"
+                            className="w-5 h-5 rounded-full object-cover border border-gray-100"
+                          />
+                        ) : (
+                          <span>👤</span>
+                        )}
+                        <span className="font-medium text-gray-600">
+                          {post.author ? post.author.username : '익명'}
+                        </span>
                       </span>
 
                       <div className="flex items-center gap-3">

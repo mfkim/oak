@@ -7,6 +7,7 @@ import Login from "./pages/Login.jsx";
 import Signup from "./pages/Signup.jsx";
 import Write from "./pages/Write.jsx";
 import Edit from "./pages/Edit.jsx";
+import MyPage from "./pages/MyPage.jsx";
 
 function App() {
   return (
@@ -23,6 +24,7 @@ function App() {
 
             <Route path="/write" element={<Write/>}/>
             <Route path="/edit/:id" element={<Edit/>}/>
+            <Route path="/mypage" element={<MyPage/>}/>
           </Routes>
         </main>
 

@@ -85,19 +85,34 @@ function CommentSection({postId, replies, onCommentChange}) {
         {replies.length > 0 ? (
           replies.map((reply) => (
             <div key={reply.id} className="flex gap-4 group">
-              <div
-                className="w-10 h-10 rounded-full bg-green-100 flex items-center justify-center text-green-600 font-bold flex-shrink-0">
-                {reply.author.username.charAt(0).toUpperCase()}
+
+              {/* ★ 프로필 이미지 */}
+              <div className="w-10 h-10 rounded-full overflow-hidden flex-shrink-0 border border-gray-100">
+                {reply.author.profileImg ? (
+                  // 1. 이미지가 있을 때: 사진 표시
+                  <img
+                    src={`http://localhost:8080${reply.author.profileImg}`}
+                    alt={reply.author.username}
+                    className="w-full h-full object-cover"
+                  />
+                ) : (
+                  // 2. 이미지가 없을 때: 기존 디자인 (초록 배경 + 이니셜) 유지
+                  <div className="w-full h-full bg-green-100 flex items-center justify-center text-green-600 font-bold">
+                    {reply.author.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
               </div>
+
               <div className="flex-1">
                 <div className="flex items-center justify-between mb-1">
-                  <span className="font-bold text-gray-900">
-                    {reply.author.username}
-                  </span>
+            <span className="font-bold text-gray-900">
+              {reply.author.username}
+            </span>
                   <div className="flex items-center gap-2">
-                    <span className="text-xs text-gray-400">
-                      {new Date(reply.createDate).toLocaleString()}
-                    </span>
+              <span className="text-xs text-gray-400">
+                {new Date(reply.createDate).toLocaleString()}
+              </span>
+
                     {/* 내 댓글일 때만 삭제 버튼 표시 */}
                     {currentUser === reply.author.username && (
                       <button
@@ -109,7 +124,7 @@ function CommentSection({postId, replies, onCommentChange}) {
                     )}
                   </div>
                 </div>
-                <p className="text-gray-700 leading-relaxed text-sm">
+                <p className="text-gray-700 leading-relaxed text-sm whitespace-pre-line">
                   {reply.content}
                 </p>
               </div>

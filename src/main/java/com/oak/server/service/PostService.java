@@ -111,6 +111,18 @@ public class PostService {
         this.postRepository.save(post);
     }
 
+    // 8. 내가 쓴 글 조회
+    @Transactional(readOnly = true)
+    public List<Post> getMyPosts(SiteUser user) {
+        return postRepository.findByAuthor(user);
+    }
+
+    // 9. 내가 좋아요 한 글 조회
+    @Transactional(readOnly = true)
+    public List<Post> getMyLikedPosts(SiteUser user) {
+        return postRepository.findByVoterContains(user);
+    }
+
     // 파일 업로드 포함 글쓰기
     @Transactional
     public void create(String title, String content, SiteUser user, MultipartFile file) throws IOException {

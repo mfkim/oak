@@ -67,4 +67,10 @@ public class ReplyService {
         }
         this.replyRepository.save(reply);
     }
+
+    // 7. 내가 쓴 댓글 조회
+    @Transactional(readOnly = true)
+    public List<Reply> getMyReplies(SiteUser user) {
+        return replyRepository.findByAuthor(user);
+    }
 }
